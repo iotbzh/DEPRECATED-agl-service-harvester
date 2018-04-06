@@ -159,28 +159,25 @@ CURL *make_curl_write_post(const char *url, struct json_object *metric)
 	const char *name = NULL,
 			*source = NULL,
 			*unit = NULL,
-			*identity = NULL,
-			**post_data;
-	char query[URL_MAXIMUM_LENGTH];
-	memset(query, 0, URL_MAXIMUM_LENGTH);
+			*identity = NULL;
 
-	post_data = malloc(sizeof(*post_data));
+	char *post_data[2], query[URL_MAXIMUM_LENGTH];
+	bzero(query, URL_MAXIMUM_LENGTH);
 
 	json_object *jv = NULL;
 	uint64_t timestamp = 0;
 
 	if(unpack_metric(metric, &name, &source, &unit, &identity, &jv, &timestamp)) {
-		AFB_ERROR("ERROR UNPACKING metric. %s", json_object_to_json_string(metric));
+		AFB_ERROR("ERROR unpacking metric. %s", json_object_to_json_string(metric));
 		curl = NULL;
 	}
 	else {
 		make_query(query, name, source, unit, identity, jv, timestamp);
 		post_data[0] = query;
 		post_data[1] = NULL;
-		curl = curl_wrap_prepare_post(url, NULL, 1, post_data);
+		curl = curl_wrap_prepare_post(url, NULL, 1, (const char * const*)post_data);
 	}
 
-	free(post_data);
 	return curl;
 }
 
