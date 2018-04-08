@@ -15,20 +15,29 @@
  * limitations under the License.
  */
 
-#define AFB_BINDING_VERSION 2
-#include <afb/afb-binding.h>
+#include "tsdb.h"
 
-union port {
-	int i_port;
-	char c_port[5]; // Available ports 1-65535
-};
+int db_ping()
+{
+	int ret = 0;
+	if(influxdb_ping() == 0) ret = INFLUX;
 
-union metric_value {
-	enum metric_type {b = 0, i, d, str} type;
-	int b_value;
-	int i_value;
-	double d_value;
-	char *str_value;
-};
+	return ret;
+}
 
-int init();
+int influxdb_ping()
+{
+	int ret = 0;
+	char *result;
+	size_t result_size;
+	CURL *request = curl_wrap_prepare_get("localhost:"DEFAULT_DBPORT"/ping",NULL, NULL);
+	curl_wrap_perform(request, &result, &result_size);
+
+	if(curl_wrap_response_code_get(request) != 204) {
+		AFB_ERROR("TimeSeries DB not reachable");
+		ret = -1;
+	}
+
+	curl_easy_cleanup(request);
+	return ret;
+}
