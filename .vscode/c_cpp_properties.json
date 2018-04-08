@@ -1,0 +1,42 @@
+{
+    "configurations": [
+        {
+            "name": "Linux",
+            "includePath": [
+                "${workspaceFolder}",
+                "/usr/include/c++/7",
+                "/usr/include/c++/7/x86_64-redhat-linux",
+                "/usr/include/c++/7/backward",
+                "/usr/local/include",
+                "/usr/lib64/clang/5.0.1/include",
+                "/usr/include",
+                "/opt/include",
+                "/opt/AGL/include",
+                "${workspaceFolder}/afb-helpers",
+                "${workspaceFolder}/src"
+            ],
+            "defines": [],
+            "intelliSenseMode": "clang-x64",
+            "browse": {
+                "path": [
+                    "${workspaceFolder}",
+                    "/usr/include/c++/7",
+                    "/usr/include/c++/7/x86_64-redhat-linux",
+                    "/usr/include/c++/7/backward",
+                    "/usr/local/include",
+                    "/usr/lib64/clang/5.0.1/include",
+                    "/usr/include",
+                    "/opt/include",
+                    "/opt/AGL/include",
+                    "${workspaceFolder}/afb-helpers"
+                ],
+                "limitSymbolsToIncludedHeaders": true,
+                "databaseFilename": ""
+            },
+            "compilerPath": "/usr/bin/clang",
+            "cStandard": "c11",
+            "cppStandard": "c++17"
+        }
+    ],
+    "version": 3
+}

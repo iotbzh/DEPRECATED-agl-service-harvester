@@ -1,0 +1,9 @@
+{
+	"files.associations": {
+		"harvester-apidef.h": "c",
+		"typeinfo": "c",
+		"curl-wrap.h": "c"
+	},
+	"C_Cpp.intelliSenseEngineFallback": "Disabled",
+	"C_Cpp.errorSquiggles": "Disabled"
+}
