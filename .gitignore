@@ -1,0 +1,16 @@
+.kdev4
+*.kdev4
+*.swp
+*.kate-swp
+.vs
+*.sln
+*.vcxproj
+*.user
+obj
+build
+bin
+docs_doxygen
+node_modules/
+_book/
+.stfolder
+*apidef*h

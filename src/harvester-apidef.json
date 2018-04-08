@@ -1,0 +1,193 @@
+{
+  "openapi": "3.0.0",
+  "$schema": "http://iot.bzh/download/openapi/schema-3.0/default-schema.json",
+  "info": {
+    "description": "",
+    "title": "harvester",
+    "version": "4.0",
+    "x-binding-c-generator": {
+      "api": "harvester",
+      "version": 2,
+      "prefix": "",
+      "postfix": "",
+      "start": null ,
+      "onevent": null,
+      "init": "init",
+      "scope": "",
+      "private": false
+    }
+  },
+  "servers": [
+    {
+      "url": "ws://{host}:{port}/api/monitor",
+      "description": "TS caching binding",
+      "variables": {
+        "host": {
+          "default": "localhost"
+        },
+        "port": {
+          "default": "1234"
+        }
+      },
+      "x-afb-events": [
+        {
+          "$ref": "#/components/schemas/afb-event"
+        }
+      ]
+    }
+  ],
+  "components": {
+    "schemas": {
+      "afb-reply": {
+        "$ref": "#/components/schemas/afb-reply-v2"
+      },
+      "afb-event": {
+        "$ref": "#/components/schemas/afb-event-v2"
+      },
+      "afb-reply-v2": {
+        "title": "Generic response.",
+        "type": "object",
+        "required": [ "jtype", "request" ],
+        "properties": {
+          "jtype": {
+            "type": "string",
+            "const": "afb-reply"
+          },
+          "request": {
+            "type": "object",
+            "required": [ "status" ],
+            "properties": {
+              "status": { "type": "string" },
+              "info": { "type": "string" },
+              "token": { "type": "string" },
+              "uuid": { "type": "string" },
+              "reqid": { "type": "string" }
+            }
+          },
+          "response": { "type": "object" }
+        }
+      },
+      "afb-event-v2": {
+        "type": "object",
+        "required": [ "jtype", "event" ],
+        "properties": {
+          "jtype": {
+            "type": "string",
+            "const": "afb-event"
+          },
+          "event": { "type": "string" },
+          "data": { "type": "object" }
+        }
+      }
+    },
+    "x-permissions": {
+        "monitor": {
+          "permission": "urn:AGL:permission:low-can:public:monitor"
+        },
+        "write": {
+          "permission": "urn:AGL:permission::platform:can:write "
+        }
+    },
+    "responses": {
+            "200": {
+              "description": "A complex object array response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/afb-reply"
+                  }
+                }
+            }
+          }
+    }
+  },
+  "paths": {
+    "/auth": {
+      "description": "Authenticate session to raise Level Of Assurance of the session",
+      "get": {
+        "x-permissions": {
+          "$ref": "#/components/x-permissions/write"
+        },
+        "responses": {
+          "200": {"$ref": "#/components/responses/200"}
+        }
+      }
+    },
+    "/write": {
+      "description": "Write a metric to local TSDB and Cloud service if available",
+      "get": {
+        "x-permissions": {
+          "LOA": 1
+        },
+        "parameters": [
+          {
+            "in": "query",
+            "name": "host",
+            "required": false,
+            "schema": { "type": "string" }
+          },
+          {
+            "in": "query",
+            "name": "port",
+            "required": false,
+            "schema": { "type": "integer" }
+          },
+          {
+            "in": "query",
+            "name": "metric",
+            "required": true,
+            "schema": { "type": "object" },
+            "parameters" : [
+              {
+                "in": "query",
+                "name": "name",
+                "required": true,
+                "schema": { "type": "string" }
+              },
+              {
+                "in": "query",
+                "name": "source",
+                "required": false,
+                "schema": { "type": "string" }
+              },
+              {
+                "in": "query",
+                "name": "unit",
+                "required": false,
+                "schema": { "type": "string" }
+              },
+              {
+                "in": "query",
+                "name": "identity",
+                "required": false,
+                "schema": { "type": "string" }
+              },
+              {
+                "in": "query",
+                "name": "value",
+                "required": true,
+                "schema": {
+                  "oneOf": [
+                    {"type": "boolean"},
+                    {"type": "integer"},
+                    {"type": "double"},
+                    {"type": "string"}
+                  ]
+                }
+              },
+              {
+                "in": "query",
+                "name": "timestamp",
+                "required": true,
+                "schema": { "type": "double" }
+              }
+            ]
+          }
+        ],
+        "responses": {
+          "200": {"$ref": "#/components/responses/200"}
+        }
+      }
+    }
+  }
+}
