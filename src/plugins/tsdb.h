@@ -15,8 +15,16 @@
  * limitations under the License.
  */
 
+#define AFB_BINDING_VERSION 2
+#include <afb/afb-binding.h>
+
 #include <json-c/json.h>
 #include "curl-wrap.h"
+
+#define DEFAULT_DB "agl-garner"
+#define DEFAULT_DBHOST "localhost"
+#define DEFAULT_DBPORT "8086"
+#define URL_MAXIMUM_LENGTH 2047
 
 enum db_available {
 	INFLUX = 1,
