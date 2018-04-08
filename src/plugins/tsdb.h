@@ -15,20 +15,16 @@
  * limitations under the License.
  */
 
-#define AFB_BINDING_VERSION 2
-#include <afb/afb-binding.h>
+#include <json-c/json.h>
+#include "curl-wrap.h"
 
-union port {
-	int i_port;
-	char c_port[5]; // Available ports 1-65535
+enum db_available {
+	INFLUX = 1,
+	GRAPHITE = 2,
+	OPENTSDB = 4
 };
 
-union metric_value {
-	enum metric_type {b = 0, i, d, str} type;
-	int b_value;
-	int i_value;
-	double d_value;
-	char *str_value;
-};
-
-int init();
+CURL *influxdb_write(const char* host, int port, json_object *metric);
+CURL *influxdb_read(const char* host, int port, json_object *query);
+void influxdb_cb(void *closure, int status, CURL *curl, const char *result, size_t size);
+int db_ping();
