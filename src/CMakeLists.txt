@@ -23,6 +23,8 @@ PROJECT_TARGET_ADD(harvester)
 	# Define project Targets
 	add_library(${TARGET_NAME} MODULE
 		${TARGET_NAME}.c
+		plugins/tsdb.c
+		plugins/influxdb.c
 	)
 
 	set(OPENAPI_DEF "harvester-apidef" CACHE STRING "name and path to the JSON API definition without extension")

@@ -15,7 +15,12 @@
  * limitations under the License.
  */
 
+#define _GNU_SOURCE
+#include <string.h>
+#include <stdio.h>
+
 #include "tsdb.h"
+#include "wrap-json.h"
 
 int create_database()
 {
@@ -37,7 +42,6 @@ int create_database()
 	}
 
 	curl_easy_cleanup(request);
-	free(post_data);
 
 	if(ret == 0)
 		AFB_NOTICE("Database 'agl-collector' created");
@@ -148,7 +152,7 @@ CURL *make_curl_write_post(const char *url, struct json_object *metric)
 		curl = NULL;
 	}
 	else {
-		for(int i = lpd; i != 0; i--) {
+		for(long unsigned int i = lpd; i != 0; i--) {
 			format_write_query(query, name, source, unit, identity, jv, timestamp);
 			post_data[i] = i == lpd ? NULL : query;
 		}
@@ -169,5 +173,5 @@ CURL *influxdb_write(const char* host, int port, json_object *metric)
 
 	strncat(url, host, strlen(host));
 	strncat(url, ":"DEFAULT_DBPORT"/write?db="DEFAULT_DB, strlen(":"DEFAULT_DBPORT"/write?db="DEFAULT_DB));
-	curl_request = make_curl_write_post(url, metric);
+	return make_curl_write_post(url, metric);
 }

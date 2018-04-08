@@ -17,14 +17,6 @@
 
 #include "tsdb.h"
 
-int db_ping()
-{
-	int ret = 0;
-	if(influxdb_ping() == 0) ret = INFLUX;
-
-	return ret;
-}
-
 int influxdb_ping()
 {
 	int ret = 0;
@@ -39,5 +31,13 @@ int influxdb_ping()
 	}
 
 	curl_easy_cleanup(request);
+	return ret;
+}
+
+int db_ping()
+{
+	int ret = 0;
+	if(influxdb_ping() == 0) ret = INFLUX;
+
 	return ret;
 }

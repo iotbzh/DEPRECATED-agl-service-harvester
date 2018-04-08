@@ -18,29 +18,28 @@
 #define _GNU_SOURCE
 #include "harvester.h"
 #include "harvester-apidef.h"
-#include <string.h>
-#include <stdio.h>
+#include <pthread.h>
 
 #include "plugins/tsdb.h"
 #include "curl-wrap.h"
 #include "wrap-json.h"
 
-#define DEFAULT_DB "agl-garner"
-#define DEFAULT_DBHOST "localhost"
-#define DEFAULT_DBPORT "8086"
-#define URL_MAXIMUM_LENGTH 2047
+#define ERROR -1
 
 CURL* (*tsdb_write)(const char* host, int port, json_object *metric);
 CURL* (*tsdb_read)(const char* host, int port, json_object *metric);
 void (*curl_cb)(void *closure, int status, CURL *curl, const char *result, size_t size);
-
+pthread_mutex_t db_mutex;
 
 int do_write(struct afb_req req, const char* host, int port, json_object *metric)
 {
 	CURL *curl_request;
 
 	curl_request = tsdb_write(host, port, metric);
+
+	pthread_mutex_lock(&db_mutex);
 	curl_wrap_do(curl_request, curl_cb, &req);
+	pthread_mutex_unlock(&db_mutex);
 
 	return 0;
 }
@@ -72,16 +71,19 @@ void auth(struct afb_req request)
 
 int init()
 {
-	/* Ok 2 int is no needed, 1 is enough but 2 is more lisible. */
-	int db_up = 0, err = 0;
-	err = curl_global_init(CURL_GLOBAL_DEFAULT);
-
-	if (!err)
-		db_up = db_ping();
-	else
+	int tsdb_available = 0;
+	if(curl_global_init(CURL_GLOBAL_DEFAULT) != 0) {
 		AFB_ERROR("Something went wrong initiliazing libcurl. Abort");
+		return ERROR;
+	}
 
-	switch (db_up) {
+	if(pthread_mutex_init(&db_mutex, NULL) != 0) {
+		AFB_ERROR("Something went wrong initiliazing mutex. Abort");
+		return ERROR;
+	}
+
+	tsdb_available = db_ping();
+	switch (tsdb_available) {
 		case INFLUX:
 			tsdb_write = influxdb_write;
 			tsdb_read = influxdb_read;
@@ -89,9 +91,9 @@ int init()
 			break;
 		default:
 			AFB_ERROR("No Time Series Database found. Abort");
-			err = -1;
+			return ERROR;
 			break;
 	}
 
-	return err;
+	return 0;
 }
