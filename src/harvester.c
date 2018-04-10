@@ -18,7 +18,6 @@
 #define _GNU_SOURCE
 #include "harvester.h"
 #include "harvester-apidef.h"
-#include <pthread.h>
 
 #include "plugins/tsdb.h"
 #include "curl-wrap.h"
@@ -26,41 +25,43 @@
 
 #define ERROR -1
 
-CURL* (*tsdb_write)(const char* host, int port, json_object *metric);
-CURL* (*tsdb_read)(const char* host, int port, json_object *metric);
-void (*curl_cb)(void *closure, int status, CURL *curl, const char *result, size_t size);
-pthread_mutex_t db_mutex;
+CURL* (*tsdb_write)(const char* host, const char *port, json_object *metric);
+void (*write_curl_cb)(void *closure, int status, CURL *curl, const char *result, size_t size);
 
-int do_write(struct afb_req req, const char* host, int port, json_object *metric)
+struct reader_args r_args = {NULL, NULL};
+
+int do_write(struct afb_req req, const char* host, const char *port, json_object *metric)
 {
 	CURL *curl_request;
 
 	curl_request = tsdb_write(host, port, metric);
-
-	pthread_mutex_lock(&db_mutex);
-	curl_wrap_do(curl_request, curl_cb, &req);
-	pthread_mutex_unlock(&db_mutex);
+	curl_wrap_do(curl_request, write_curl_cb, &req);
 
 	return 0;
 }
 
 void write(struct afb_req req)
 {
-	int port = -1;
+	const char *port = NULL;
 	const char *host = NULL;
 
 	json_object *req_args = afb_req_json(req),
+				*portJ = NULL,
 				*metric = NULL;
 
-	if(wrap_json_unpack(req_args, "{s?s,s?i,so!}",
+	if(wrap_json_unpack(req_args, "{s?s,s?o,so!}",
 								"host", &host,
-								"port", &port,
+								"port", &portJ,
 								"metric", &metric) || ! metric)
 		afb_req_fail(req, "Failed", "Error processing arguments. Miss metric\
-		JSON object or malformed");
-	else if(do_write(req, host, port, metric))
-		afb_req_fail(req, "Failed", "Error processing metric JSON object.\
-		Malformed !");
+JSON object or malformed");
+	else {
+		port = json_object_is_type(portJ, json_type_null) ?
+				NULL : json_object_to_json_string(portJ);
+		if(do_write(req, host, port, metric))
+			afb_req_fail(req, "Failed", "Error processing metric JSON object.\
+Malformed !");
+	}
 }
 
 void auth(struct afb_req request)
@@ -72,13 +73,9 @@ void auth(struct afb_req request)
 int init()
 {
 	int tsdb_available = 0;
+
 	if(curl_global_init(CURL_GLOBAL_DEFAULT) != 0) {
 		AFB_ERROR("Something went wrong initiliazing libcurl. Abort");
-		return ERROR;
-	}
-
-	if(pthread_mutex_init(&db_mutex, NULL) != 0) {
-		AFB_ERROR("Something went wrong initiliazing mutex. Abort");
 		return ERROR;
 	}
 
@@ -86,8 +83,11 @@ int init()
 	switch (tsdb_available) {
 		case INFLUX:
 			tsdb_write = influxdb_write;
-			tsdb_read = influxdb_read;
-			curl_cb = influxdb_cb;
+			write_curl_cb = influxdb_write_curl_cb;
+			if(influxdb_reader(&r_args) != 0) {
+				AFB_ERROR("Problem initiating reader timer. Abort");
+				return ERROR;
+			}
 			break;
 		default:
 			AFB_ERROR("No Time Series Database found. Abort");

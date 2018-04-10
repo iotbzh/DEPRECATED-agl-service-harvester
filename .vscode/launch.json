@@ -8,7 +8,7 @@
 			"name": "(gdb) Launch",
 			"type": "cppdbg",
 			"request": "launch",
-			"program": "/opt/bin/afb-daemon",
+			"program": "/opt/AGL/bin/afb-daemon",
 			"args": [ "--rootdir=${workspaceRoot}/build/package/",
 			"--workdir=${workspaceRoot}/build/package/",
 			"--ldpaths=lib",
