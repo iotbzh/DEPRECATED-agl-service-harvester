@@ -130,7 +130,10 @@
             "in": "query",
             "name": "port",
             "required": false,
-            "schema": { "type": "integer" }
+            "schema": { "oneOf": [
+              {"type": "integer"},
+              {"type": "string"}
+            ]}
           },
           {
             "in": "query",
@@ -153,6 +156,12 @@
               {
                 "in": "query",
                 "name": "unit",
+                "required": false,
+                "schema": { "type": "string" }
+              },
+              {
+                "in": "query",
+                "name": "priority",
                 "required": false,
                 "schema": { "type": "string" }
               },

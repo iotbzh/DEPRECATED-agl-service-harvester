@@ -15,31 +15,13 @@
  * limitations under the License.
  */
 
-#define AFB_BINDING_VERSION 2
-#include <afb/afb-binding.h>
+#include "wrap-json.h"
+#include "tsdb.h"
 
-#include <json-c/json.h>
-#include "curl-wrap.h"
+int create_database();
 
-#define DEFAULT_DB "agl-garner"
-#define DEFAULT_DBHOST "localhost"
-#define DEFAULT_DBPORT "8086"
-#define URL_MAXIMUM_LENGTH 2047
+int unpack_metric_from_binding(json_object *m, const char **name, const char **source, const char **unit, const char **identity, json_object **jv, uint64_t *timestamp);
 
-enum db_available {
-	INFLUX = 1,
-	GRAPHITE = 2,
-	OPENTSDB = 4
-};
+void concatenate(char* dest, const char* source, const char *sep);
 
-struct reader_args {
-	const char *host;
-	const char *port;
-};
-
-CURL *influxdb_write(const char* host, const char *port, json_object *metric);
-void influxdb_write_curl_cb(void *closure, int status, CURL *curl, const char *result, size_t size);
-
-int influxdb_reader(void *args);
-
-int db_ping();
+size_t make_url(char *url, size_t l_url, const char *host, const char *port, const char *endpoint);

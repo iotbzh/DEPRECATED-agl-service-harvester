@@ -2,7 +2,14 @@
 	"files.associations": {
 		"harvester-apidef.h": "c",
 		"typeinfo": "c",
-		"curl-wrap.h": "c"
+		"curl-wrap.h": "c",
+		"wrap-json.h": "c",
+		"array": "c",
+		"initializer_list": "c",
+		"string_view": "c",
+		"utility": "c",
+		"valarray": "c",
+		"string.h": "c"
 	},
 	"C_Cpp.intelliSenseEngineFallback": "Disabled",
 	"C_Cpp.errorSquiggles": "Disabled"
