@@ -5,10 +5,39 @@
 	"version": "0.2.0",
 	"configurations": [
 		{
-			"name": "(gdb) Launch",
+			"name": "First_run",
 			"type": "cppdbg",
 			"request": "launch",
+			"preLaunchTask": "first_run",
 			"program": "/opt/AGL/bin/afb-daemon",
+			"args": [ "--rootdir=${workspaceRoot}/build/package/",
+			"--workdir=${workspaceRoot}/build/package/",
+			"--ldpaths=lib",
+			"--roothttp=.",
+			"--tracereq=common",
+			"--token=1",
+			"--verbose",
+			"--verbose",
+			"--verbose"],
+			"additionalSOLibSearchPath": "${workspaceRoot}/build/package/lib",
+			"stopAtEntry": false,
+			"cwd": "${workspaceRoot}/build/package",
+			"environment": [],
+			"externalConsole": true,
+			"MIMode": "gdb",
+			"setupCommands": [
+				{
+					"description": "Enable pretty-printing for gdb",
+					"text": "-enable-pretty-printing",
+					"ignoreFailures": true
+				}
+			]
+		},
+		{
+			"name": "Resuming_run",
+			"type": "cppdbg",
+			"request": "launch",
+			"program": "/opt/bin/afb-daemon",
 			"args": [ "--rootdir=${workspaceRoot}/build/package/",
 			"--workdir=${workspaceRoot}/build/package/",
 			"--ldpaths=lib",
