@@ -13,10 +13,7 @@
 		"stdio.h": "c",
 		"ratio": "c",
 		"system_error": "c",
-		"type_traits": "c",
-		"istream": "c",
-		"optional": "c",
-		"ostream": "c"
+		"type_traits": "c"
 	},
 	"C_Cpp.intelliSenseEngineFallback": "Disabled",
 	"C_Cpp.errorSquiggles": "Disabled"
