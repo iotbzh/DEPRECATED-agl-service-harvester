@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015, 2016, 2017, 2018 "IoT.bzh"
+ * Copyright (C) 2018 "IoT.bzh"
  * Author "Romain Forlot" <romain.forlot@iot.bzh>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,11 +15,16 @@
  * limitations under the License.
  */
 
+#ifndef _TSDB_H
+#define _TSDB_H
+
 #define AFB_BINDING_VERSION 2
 #include <afb/afb-binding.h>
 
 #include <json-c/json.h>
 #include "curl-wrap.h"
+
+#define ERROR -1
 
 #define DEFAULT_DB "agl-garner"
 #define DEFAULT_DBHOST "localhost"
@@ -35,6 +40,7 @@ enum db_available {
 struct reader_args {
 	const char *host;
 	const char *port;
+	u_int32_t delay;
 };
 
 CURL *influxdb_write(const char* host, const char *port, json_object *metric);
@@ -45,3 +51,5 @@ int influxdb_reader(void *args);
 int db_ping();
 
 u_int64_t get_ts();
+
+#endif

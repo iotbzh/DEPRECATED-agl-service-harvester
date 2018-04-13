@@ -27,8 +27,8 @@ struct list {
 };
 
 void destroy_list(struct list *l);
-void add_elt(struct list *l, const char *key, json_object *value);
-void add_key(struct list *l, const char *key);
+void add_elt(struct list **l, const char *key, json_object *value);
+void add_key(struct list **l, const char *key);
 struct list *get_elt(struct list *l, int index);
 struct list *find_elt_from_key(struct list *l, const char *key);
 json_object *find_key_value(struct list *l, const char *key);

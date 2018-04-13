@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015, 2016, 2017, 2018 "IoT.bzh"
+ * Copyright (C) 2018 "IoT.bzh"
  * Author "Romain Forlot" <romain.forlot@iot.bzh>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,13 +15,31 @@
  * limitations under the License.
  */
 
+#ifndef _INFLUXDB_H_
+#define _INFLUXDB_H_
+
+#define _GNU_SOURCE
 #include "wrap-json.h"
 #include "tsdb.h"
+#include "../utils/list.h"
+
+struct series_columns_t {
+	struct list *tags;
+	struct list *fields;
+};
+
+struct series_t {
+	const char *name;
+	struct series_columns_t series_columns;
+	uint64_t timestamp;
+};
 
 int create_database();
 
-int unpack_metric_from_binding(json_object *m, const char **name, const char **source, const char **unit, const char **identity, json_object **jv, uint64_t *timestamp);
+int unpack_metric_from_api(json_object *m, struct series_t **serie);
 
 void concatenate(char* dest, const char* source, const char *sep);
 
 size_t make_url(char *url, size_t l_url, const char *host, const char *port, const char *endpoint);
+
+#endif

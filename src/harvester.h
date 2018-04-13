@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015, 2016, 2017, 2018 "IoT.bzh"
+ * Copyright (C) 2018 "IoT.bzh"
  * Author "Romain Forlot" <romain.forlot@iot.bzh>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,17 +14,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#ifndef _HARVESTER_H_
+#define _HARVESTER_H_
 
 #define AFB_BINDING_VERSION 2
 #include <afb/afb-binding.h>
 
-union port {
-	int i_port;
-	char c_port[5]; // Available ports 1-65535
-};
-
+enum metric_type {b = 0, i, d, str} type;
 union metric_value {
-	enum metric_type {b = 0, i, d, str} type;
 	int b_value;
 	int i_value;
 	double d_value;
@@ -32,3 +29,5 @@ union metric_value {
 };
 
 int init();
+
+#endif

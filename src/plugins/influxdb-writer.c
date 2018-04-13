@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015, 2016, 2017, 2018 "IoT.bzh"
+ * Copyright (C) 2018 "IoT.bzh"
  * Author "Romain Forlot" <romain.forlot@iot.bzh>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,46 +16,57 @@
  */
 
 #define _GNU_SOURCE
-#include <stdio.h>
 #include <string.h>
+#include <stdio.h>
+
 #include "influxdb.h"
 
-size_t format_write_args(char *query, const char *name, const char *source, const char *unit, const char *identity, json_object *jv, uint64_t timestamp)
+static size_t format_write_args(char *query, struct series_t *serie)
 {
 	char *ts;
-	memset(query, 0, URL_MAXIMUM_LENGTH);
+	struct list *tags = serie->series_columns.tags;
+	struct list *fields = serie->series_columns.fields;
 
-	strncat(query, name, strlen(name));
-	if (source) {
-		concatenate(query, source, ",");
+	strncat(query, serie->name, strlen(serie->name));
+	if(tags) {
+		while(tags != NULL) {
+			concatenate(query, tags->key, ",");
+			if(json_object_is_type(tags->value, json_type_string))
+				concatenate(query, json_object_get_string(tags->value), "=");
+			else
+				concatenate(query, json_object_to_json_string(tags->value), "=");
+			tags = tags->next;
+		}
 	}
-	if (unit) {
-		concatenate(query, unit, ",");
-	}
-	if (identity) {
-		concatenate(query, identity, ",");
+	if(fields) {
+		int i = 0;
+		for(struct list *it = fields; it != NULL; it = it->next) {
+			if(!i)
+				concatenate(query, fields->key, " ");
+			else
+				concatenate(query, fields->key, ",");
+			if(json_object_is_type(fields->value, json_type_string))
+				concatenate(query, json_object_get_string(fields->value), "=");
+			else
+				concatenate(query, json_object_to_json_string(fields->value), "=");
+			i++;
+		}
 	}
 
-	concatenate(query, "value", " ");
-	concatenate(query, json_object_to_json_string(jv), "=");
-	asprintf(&ts, "%lu", timestamp);
+	asprintf(&ts, "%lu", serie->timestamp);
 	concatenate(query, ts, " ");
+	strcat(query, "\n");
 
 	return strlen(query);
 }
 
-CURL *make_curl_write_post(const char *url, json_object *metric)
+CURL *make_curl_write_post(const char *url, json_object *metricJ)
 {
 	CURL *curl;
-	json_object *jv = NULL;
-	uint64_t timestamp = 0;
-	const char *name = NULL,
-			*source = NULL,
-			*unit = NULL,
-			*identity = NULL;
+	struct series_t *serie = NULL;
 
-	size_t lpd = json_object_is_type(metric, json_type_array) ?
-				 json_object_array_length(metric) + 1 : 2;
+	size_t lpd = json_object_is_type(metricJ, json_type_array) ?
+				 json_object_array_length(metricJ) + 1 : 2;
 
 	char **post_data;
 	post_data = malloc(lpd);
@@ -63,14 +74,14 @@ CURL *make_curl_write_post(const char *url, json_object *metric)
 	char write[URL_MAXIMUM_LENGTH];
 	bzero(write, URL_MAXIMUM_LENGTH);
 
-	if(unpack_metric_from_binding(metric, &name, &source, &unit, &identity, &jv, &timestamp)) {
-		AFB_ERROR("ERROR unpacking metric. %s", json_object_to_json_string(metric));
+	if(unpack_metric_from_api(metricJ, &serie)) {
+		AFB_ERROR("ERROR unpacking metric. %s", json_object_to_json_string(metricJ));
 		curl = NULL;
 	}
 	else {
 		for(long int i = --lpd; i >= 0; i--) {
-			format_write_args(write, name, source, unit, identity, jv, timestamp);
-			post_data[i] = i == lpd ? NULL : write;
+			format_write_args(write, serie);
+			post_data[i] = i == lpd-1 ? NULL : write;
 		}
 		curl = curl_wrap_prepare_post(url, NULL, 1, (const char * const*)post_data);
 	}
@@ -108,9 +119,9 @@ void influxdb_write_curl_cb(void *closure, int status, CURL *curl, const char *r
 	}
 }
 
-CURL *influxdb_write(const char* host, const char *port, json_object *metric)
+CURL *influxdb_write(const char* host, const char *port, json_object *metricJ)
 {
 	char url[URL_MAXIMUM_LENGTH]; /* Safe limit for most popular web browser */
 	make_url(url, sizeof(url), host, port, "write");
-	return make_curl_write_post(url, metric);
+	return make_curl_write_post(url, metricJ);
 }
