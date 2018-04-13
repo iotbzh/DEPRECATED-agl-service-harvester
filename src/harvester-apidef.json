@@ -113,8 +113,8 @@
         }
       }
     },
-    "/write": {
-      "description": "Write a metric to local TSDB and Cloud service if available",
+    "/record": {
+      "description": "Record a metric to local TSDB and Cloud service if available",
       "get": {
         "x-permissions": {
           "LOA": 1
