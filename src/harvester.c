@@ -40,7 +40,7 @@ int do_write(struct afb_req req, const char* host, const char *port, json_object
 	return 0;
 }
 
-void write(struct afb_req req)
+void record(struct afb_req req)
 {
 	const char *port = NULL;
 	const char *host = NULL;
