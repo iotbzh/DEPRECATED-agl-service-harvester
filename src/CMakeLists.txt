@@ -27,6 +27,7 @@ PROJECT_TARGET_ADD(harvester)
 		plugins/influxdb.c
 		plugins/influxdb-writer.c
 		plugins/influxdb-reader.c
+		utils/list.c
 	)
 
 	set(OPENAPI_DEF "harvester-apidef" CACHE STRING "name and path to the JSON API definition without extension")
