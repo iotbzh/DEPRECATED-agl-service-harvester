@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015, 2016, 2017, 2018 "IoT.bzh"
+ * Copyright (C) 2018 "IoT.bzh"
  * Author "Romain Forlot" <romain.forlot@iot.bzh>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -28,7 +28,7 @@ int influxdb_ping()
 
 	if(curl_wrap_response_code_get(request) != 204) {
 		AFB_ERROR("TimeSeries DB not reachable");
-		ret = -1;
+		ret = ERROR;
 	}
 
 	curl_easy_cleanup(request);
@@ -43,10 +43,10 @@ int db_ping()
 	return ret;
 }
 
-u_int64_t get_ts()
+uint64_t get_ts()
 {
 	struct timespec ts;
 	clock_gettime(CLOCK_REALTIME, &ts);
 
-	return (int64_t)(ts.tv_sec) * (int64_t)1000000000 + (int64_t)(ts.tv_nsec);
+	return (uint64_t)(ts.tv_sec) * (uint64_t)1000000000 + (uint64_t)(ts.tv_nsec);
 }

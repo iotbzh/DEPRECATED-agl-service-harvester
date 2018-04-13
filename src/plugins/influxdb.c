@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015, 2016, 2017, 2018 "IoT.bzh"
+ * Copyright (C) 2018 "IoT.bzh"
  * Author "Romain Forlot" <romain.forlot@iot.bzh>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,54 +21,10 @@
 #include <unistd.h>
 #include <string.h>
 
+#include "influxdb.h"
 #include "tsdb.h"
 #include "wrap-json.h"
-
-int create_database()
-{
-	int ret = 0;
-	char *result;
-	size_t result_size;
-
-	// Declare query to be posted
-	const char *post_data[2];
-	post_data[0] = "q=CREATE DATABASE \""DEFAULT_DB"\"";
-	post_data[1] = NULL;
-
-	CURL *request = curl_wrap_prepare_post("localhost:"DEFAULT_DBPORT"/query",NULL, 1, post_data);
-	curl_wrap_perform(request, &result, &result_size);
-
-	if(curl_wrap_response_code_get(request) != 200) {
-		AFB_ERROR("Can't create database.");
-		ret = -1;
-	}
-
-	curl_easy_cleanup(request);
-
-	if(ret == 0)
-		AFB_NOTICE("Database 'agl-collector' created");
-
-	return ret;
-}
-
-int unpack_metric_from_binding(json_object *m, const char **name, const char **source, const char **unit, const char **identity, json_object **jv, uint64_t *timestamp)
-{
-	if (wrap_json_unpack(m, "{ss,s?s,s?s,s?s,so,sI!}",
-					"name", name,
-					"source", source,
-					"unit", unit,
-					"identity", identity,
-					"value", jv,
-					"timestamp", timestamp))
-		return -1;
-	else if (!json_object_is_type(*jv, json_type_boolean) &&
-			 !json_object_is_type(*jv, json_type_double) &&
-			 !json_object_is_type(*jv, json_type_int) &&
-			 !json_object_is_type(*jv, json_type_string))
-		return -1;
-
-	return 0;
-}
+#include "../utils/list.h"
 
 void concatenate(char* dest, const char* source, const char *sep)
 {
@@ -92,4 +48,65 @@ size_t make_url(char *url, size_t l_url, const char *host, const char *port, con
 	strncat(url, "?db="DEFAULT_DB, strlen("?db="DEFAULT_DB));
 
 	return strlen(url);
+}
+
+
+int create_database()
+{
+	int ret = 0;
+	char *result;
+	size_t result_size;
+
+	// Declare query to be posted
+	const char *post_data[2];
+	post_data[0] = "q=CREATE DATABASE \""DEFAULT_DB"\"";
+	post_data[1] = NULL;
+
+	CURL *request = curl_wrap_prepare_post("localhost:"DEFAULT_DBPORT"/query",NULL, 1, post_data);
+	curl_wrap_perform(request, &result, &result_size);
+
+	if(curl_wrap_response_code_get(request) != 200) {
+		AFB_ERROR("Can't create database.");
+		ret = ERROR;
+	}
+
+	curl_easy_cleanup(request);
+
+	if(ret == 0)
+		AFB_NOTICE("Database '"DEFAULT_DB"' created");
+
+	return ret;
+}
+
+void unpacking_from_api(void *s, json_object *valueJ, const char *key)
+{
+	size_t key_length = strlen(key);
+	struct series_t *serie = (struct series_t*)s;
+
+	/* Treat the 2 static key that could have been specified */
+	if(strcasecmp("name", key) == 0)
+		serie->name = json_object_get_string(valueJ);
+	else if(strcasecmp("timestamp", key) == 0)
+		serie->timestamp = get_ts();
+	/* Treat all key looking for tag and field object. Those ones could be find
+	   with the last 2 character. '_t' for tag and '_f' that are the keys that
+	   could be indefinite. Cf influxdb documentation:
+	   https://docs.influxdata.com/influxdb/v1.5/write_protocols/line_protocol_reference/ */
+	else if(strncasecmp(&key[key_length-2], "_t", 2) == 0)
+		add_elt(&serie->series_columns.tags, key, valueJ);
+	else if(strncasecmp(&key[key_length-2], "_f", 2) == 0)
+		add_elt(&serie->series_columns.fields, key, valueJ);
+}
+
+int unpack_metric_from_api(json_object *m, struct series_t **serie)
+{
+	*serie = malloc(sizeof(struct series_t));
+	bzero(*serie, sizeof(struct series_t));
+
+	wrap_json_object_for_all(m, unpacking_from_api, *serie);
+
+	if(!(*serie)->timestamp)
+		(*serie)->timestamp = get_ts();
+
+	return 0;
 }

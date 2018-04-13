@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015, 2016, 2017, 2018 "IoT.bzh"
+ * Copyright (C) 2018 "IoT.bzh"
  * Author "Romain Forlot" <romain.forlot@iot.bzh>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,12 +23,10 @@
 #include "curl-wrap.h"
 #include "wrap-json.h"
 
-#define ERROR -1
-
 CURL* (*tsdb_write)(const char* host, const char *port, json_object *metric);
 void (*write_curl_cb)(void *closure, int status, CURL *curl, const char *result, size_t size);
 
-struct reader_args r_args = {NULL, NULL};
+struct reader_args r_args = {NULL, NULL, 1000000};
 
 int do_write(struct afb_req req, const char* host, const char *port, json_object *metric)
 {
@@ -40,7 +38,7 @@ int do_write(struct afb_req req, const char* host, const char *port, json_object
 	return 0;
 }
 
-void record(struct afb_req req)
+void afv_write(struct afb_req req)
 {
 	const char *port = NULL;
 	const char *host = NULL;
@@ -64,7 +62,7 @@ Malformed !");
 	}
 }
 
-void auth(struct afb_req request)
+void afv_auth(struct afb_req request)
 {
 	afb_req_session_set_LOA(request, 1);
 	afb_req_success(request, NULL, NULL);
@@ -94,6 +92,6 @@ int init()
 			return ERROR;
 			break;
 	}
-
+	/* TODO:*/
 	return 0;
 }

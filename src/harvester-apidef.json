@@ -8,7 +8,7 @@
     "x-binding-c-generator": {
       "api": "harvester",
       "version": 2,
-      "prefix": "",
+      "prefix": "afv_",
       "postfix": "",
       "start": null ,
       "onevent": null,
@@ -82,7 +82,7 @@
     },
     "x-permissions": {
         "monitor": {
-          "permission": "urn:AGL:permission:low-can:public:monitor"
+          "permission": "urn:AGL:permission:harvester:public:monitor"
         },
         "write": {
           "permission": "urn:AGL:permission::platform:can:write "
@@ -113,7 +113,7 @@
         }
       }
     },
-    "/record": {
+    "/write": {
       "description": "Record a metric to local TSDB and Cloud service if available",
       "get": {
         "x-permissions": {

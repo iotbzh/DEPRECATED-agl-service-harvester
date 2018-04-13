@@ -28,39 +28,39 @@ void destroy_list(struct list *l)
 	}
 }
 
-void add_elt(struct list *l, const char *key, json_object *value)
+void add_elt(struct list **l, const char *key, json_object *value)
 {
 	struct list *new_elt = malloc(sizeof(struct list));
 	new_elt->key = key;
 	new_elt->value = value;
 	new_elt->next = NULL;
 
-	if(l) {
-		while(l->next != NULL) {
-			l = l->next;
+	if(*l) {
+		while((*l)->next != NULL) {
+			*l = (*l)->next;
 		}
-		l->next = new_elt;
+		(*l)->next = new_elt;
 	}
 	else {
-		l = new_elt;
+		*l = new_elt;
 	}
 }
 
-void add_key(struct list *l, const char *key)
+void add_key(struct list **l, const char *key)
 {
 	struct list *new_elt = malloc(sizeof(struct list));
 	new_elt->key = key;
 	new_elt->value = NULL;
 	new_elt->next = NULL;
 
-	if(l) {
-		while(l->next != NULL) {
-			l = l->next;
+	if(*l) {
+		while((*l)->next != NULL) {
+			*l = (*l)->next;
 		}
-		l->next = new_elt;
+		(*l)->next = new_elt;
 	}
 	else {
-		l = new_elt;
+		*l = new_elt;
 	}
 }
 
