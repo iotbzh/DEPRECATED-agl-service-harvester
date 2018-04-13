@@ -43,3 +43,5 @@ void influxdb_write_curl_cb(void *closure, int status, CURL *curl, const char *r
 int influxdb_reader(void *args);
 
 int db_ping();
+
+u_int64_t get_ts();

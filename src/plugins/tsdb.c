@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+#include <time.h>
 #include "tsdb.h"
 
 int influxdb_ping()
@@ -40,4 +41,12 @@ int db_ping()
 	if(influxdb_ping() == 0) ret = INFLUX;
 
 	return ret;
+}
+
+u_int64_t get_ts()
+{
+	struct timespec ts;
+	clock_gettime(CLOCK_REALTIME, &ts);
+
+	return (int64_t)(ts.tv_sec) * (int64_t)1000000000 + (int64_t)(ts.tv_nsec);
 }
