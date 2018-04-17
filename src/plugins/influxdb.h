@@ -23,20 +23,20 @@
 #include "tsdb.h"
 #include "../utils/list.h"
 
-struct series_columns_t {
+struct serie_columns_t {
 	struct list *tags;
 	struct list *fields;
 };
 
 struct series_t {
 	const char *name;
-	struct series_columns_t series_columns;
+	struct serie_columns_t serie_columns;
 	uint64_t timestamp;
 };
 
 int create_database();
 
-int unpack_metric_from_api(json_object *m, struct series_t **serie);
+int unpack_metric_from_api(json_object *m, struct series_t *serie);
 
 void concatenate(char* dest, const char* source, const char *sep);
 

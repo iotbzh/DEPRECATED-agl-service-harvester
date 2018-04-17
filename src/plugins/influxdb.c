@@ -93,20 +93,17 @@ void unpacking_from_api(void *s, json_object *valueJ, const char *key)
 	   could be indefinite. Cf influxdb documentation:
 	   https://docs.influxdata.com/influxdb/v1.5/write_protocols/line_protocol_reference/ */
 	else if(strncasecmp(&key[key_length-2], "_t", 2) == 0)
-		add_elt(&serie->series_columns.tags, key, valueJ);
+		add_elt(&serie->serie_columns.tags, key, valueJ);
 	else if(strncasecmp(&key[key_length-2], "_f", 2) == 0)
-		add_elt(&serie->series_columns.fields, key, valueJ);
+		add_elt(&serie->serie_columns.fields, key, valueJ);
 }
 
-int unpack_metric_from_api(json_object *m, struct series_t **serie)
+int unpack_metric_from_api(json_object *m, struct series_t *serie)
 {
-	*serie = malloc(sizeof(struct series_t));
-	bzero(*serie, sizeof(struct series_t));
+	wrap_json_object_for_all(m, unpacking_from_api, serie);
 
-	wrap_json_object_for_all(m, unpacking_from_api, *serie);
-
-	if(!(*serie)->timestamp)
-		(*serie)->timestamp = get_ts();
+	if(!serie->timestamp)
+		serie->timestamp = get_ts();
 
 	return 0;
 }
