@@ -64,6 +64,20 @@ void add_key(struct list **l, const char *key)
 	}
 }
 
+int set_value(struct list *l, json_object *val, int index)
+{
+	int i;
+
+	for (i = 0; i < index; i++) {
+		l = l->next;
+		if ( l == NULL )
+			return -1;
+	}
+
+	l->value = val;
+	return 0;
+}
+
 struct list *get_elt(struct list *l, int index)
 {
 	int i;
