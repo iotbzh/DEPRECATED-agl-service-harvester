@@ -24,8 +24,8 @@
 static size_t format_write_args(char *query, struct series_t *serie)
 {
 	char *ts;
-	struct list *tags = serie->series_columns.tags;
-	struct list *fields = serie->series_columns.fields;
+	struct list *tags = serie->serie_columns.tags;
+	struct list *fields = serie->serie_columns.fields;
 
 	strncat(query, serie->name, strlen(serie->name));
 	if(tags) {
@@ -60,36 +60,6 @@ static size_t format_write_args(char *query, struct series_t *serie)
 	return strlen(query);
 }
 
-CURL *make_curl_write_post(const char *url, json_object *metricJ)
-{
-	CURL *curl;
-	struct series_t *serie = NULL;
-
-	size_t lpd = json_object_is_type(metricJ, json_type_array) ?
-				 json_object_array_length(metricJ) + 1 : 2;
-
-	char **post_data;
-	post_data = malloc(lpd);
-
-	char write[URL_MAXIMUM_LENGTH];
-	bzero(write, URL_MAXIMUM_LENGTH);
-
-	if(unpack_metric_from_api(metricJ, &serie)) {
-		AFB_ERROR("ERROR unpacking metric. %s", json_object_to_json_string(metricJ));
-		curl = NULL;
-	}
-	else {
-		for(long int i = --lpd; i >= 0; i--) {
-			format_write_args(write, serie);
-			post_data[i] = i == lpd-1 ? NULL : write;
-		}
-		curl = curl_wrap_prepare_post(url, NULL, 1, (const char * const*)post_data);
-	}
-	free(post_data);
-
-	return curl;
-}
-
 void influxdb_write_curl_cb(void *closure, int status, CURL *curl, const char *result, size_t size)
 {
 	struct afb_req *req = (struct afb_req*)closure;
@@ -117,6 +87,44 @@ void influxdb_write_curl_cb(void *closure, int status, CURL *curl, const char *r
 			afb_req_fail(*req, "Failure", "Unexpected behavior.");
 			break;
 	}
+}
+
+CURL *make_curl_write_post(const char *url, json_object *metricsJ)
+{
+	CURL *curl = NULL;
+	size_t lpd = 0, i = 0;
+	char **post_data;
+	char write[URL_MAXIMUM_LENGTH];
+	struct series_t *serie = NULL;
+
+	lpd = json_object_is_type(metricsJ, json_type_array) ?
+		  json_object_array_length(metricsJ) + 1 : 2;
+
+	serie = malloc(sizeof(struct series_t));
+	post_data = malloc(lpd);
+
+	for(i = 0; i < lpd; i++) {
+		bzero(serie, sizeof(struct series_t));
+
+		if(unpack_metric_from_api(json_object_array_get_idx(metricsJ, i), serie)) {
+			AFB_ERROR("ERROR unpacking metric. %s", json_object_to_json_string(metricsJ));
+			break;
+		}
+		else {
+			bzero(write, URL_MAXIMUM_LENGTH);
+			format_write_args(write, serie);
+			post_data[i] = i == lpd - 1 ? NULL : write;
+		}
+	}
+
+	/* Check that we just do not broke the for loop before trying preparing CURL
+	   request object */
+	curl = i == lpd ?
+		   curl_wrap_prepare_post(url, NULL, 1, (const char * const*)post_data):NULL;
+	free(serie);
+	free(post_data);
+
+	return curl;
 }
 
 CURL *influxdb_write(const char* host, const char *port, json_object *metricJ)
