@@ -96,9 +96,17 @@ CURL *make_curl_write_post(const char *url, json_object *metricsJ)
 	char **post_data;
 	char write[URL_MAXIMUM_LENGTH];
 	struct series_t *serie = NULL;
+	json_object *metricsArrayJ = NULL;
 
-	lpd = json_object_is_type(metricsJ, json_type_array) ?
-		  json_object_array_length(metricsJ) + 1 : 2;
+	if(json_object_is_type(metricsJ, json_type_array)) {
+		lpd = json_object_array_length(metricsJ);
+		metricsArrayJ = metricsJ;
+	}
+	else {
+		metricsArrayJ = json_object_new_array();
+		json_object_array_add(metricsArrayJ, metricsJ);
+		lpd = 1;
+	}
 
 	serie = malloc(sizeof(struct series_t));
 	post_data = malloc(lpd);
@@ -106,21 +114,27 @@ CURL *make_curl_write_post(const char *url, json_object *metricsJ)
 	for(i = 0; i < lpd; i++) {
 		bzero(serie, sizeof(struct series_t));
 
-		if(unpack_metric_from_api(json_object_array_get_idx(metricsJ, i), serie)) {
-			AFB_ERROR("ERROR unpacking metric. %s", json_object_to_json_string(metricsJ));
+		if(unpack_metric_from_api(json_object_array_get_idx(metricsArrayJ, i), serie)) {
+			AFB_ERROR("ERROR unpacking metric. %s", json_object_to_json_string(metricsArrayJ));
 			break;
 		}
 		else {
 			bzero(write, URL_MAXIMUM_LENGTH);
-			format_write_args(write, serie);
-			post_data[i] = i == lpd - 1 ? NULL : write;
+			if(! serie->name) {
+				post_data[i] = NULL;
+			}
+			else {
+				format_write_args(write, serie);
+				strcpy(post_data[i], write);
+			}
 		}
 	}
+	post_data[i] = NULL;
 
 	/* Check that we just do not broke the for loop before trying preparing CURL
 	   request object */
 	curl = i == lpd ?
-		   curl_wrap_prepare_post(url, NULL, 1, (const char * const*)post_data):NULL;
+		   curl_wrap_prepare_post(url, NULL, 1, " ", (const char * const*)post_data) : NULL;
 	free(serie);
 	free(post_data);
 
