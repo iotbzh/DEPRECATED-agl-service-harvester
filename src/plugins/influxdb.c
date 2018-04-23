@@ -62,7 +62,7 @@ int create_database()
 	post_data[0] = "q=CREATE DATABASE \""DEFAULT_DB"\"";
 	post_data[1] = NULL;
 
-	CURL *request = curl_wrap_prepare_post("localhost:"DEFAULT_DBPORT"/query",NULL, 1, ' ', post_data);
+	CURL *request = curl_wrap_prepare_post_binary("localhost:"DEFAULT_DBPORT"/query",NULL, " ", post_data);
 	curl_wrap_perform(request, &result, &result_size);
 
 	if(curl_wrap_response_code_get(request) != 200) {
