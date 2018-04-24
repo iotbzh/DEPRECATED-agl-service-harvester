@@ -134,7 +134,7 @@ CURL *make_curl_write_post(const char *url, json_object *metricsJ)
 	/* Check that we just do not broke the for loop before trying preparing CURL
 	   request object */
 	curl = i == lpd ?
-		   curl_wrap_prepare_post_binary(url, NULL, " ", (const char * const*)post_data) : NULL;
+		   curl_wrap_prepare_post_unescaped(url, NULL, " ", (const char * const*)post_data) : NULL;
 	free(serie);
 	free(post_data);
 
