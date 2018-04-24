@@ -62,7 +62,7 @@ int create_database()
 	post_data[0] = "q=CREATE DATABASE \""DEFAULT_DB"\"";
 	post_data[1] = NULL;
 
-	CURL *request = curl_wrap_prepare_post_binary("localhost:"DEFAULT_DBPORT"/query",NULL, " ", post_data);
+	CURL *request = curl_wrap_prepare_post_unescaped("localhost:"DEFAULT_DBPORT"/query",NULL, " ", post_data);
 	curl_wrap_perform(request, &result, &result_size);
 
 	if(curl_wrap_response_code_get(request) != 200) {
@@ -78,6 +78,31 @@ int create_database()
 	return ret;
 }
 
+void unpack_values(void *l, json_object *valuesJ, const char *key)
+{
+	struct list *oneList = (struct list *)l;
+
+	/* Append a suffix to be able to differentiate tags and fields at reading
+	   time */
+	char *suffixed_key = calloc(1, strlen(key) + 3);
+	strcpy(suffixed_key, key);
+	strcat(suffixed_key, "_f");
+
+	add_elt(&oneList, suffixed_key, valuesJ);
+}
+
+void unpack_metadata(void *l, json_object *valuesJ, const char *key)
+{
+	struct list *oneList = (struct list *)l;
+
+	/* Append a suffix to be able to differentiate tags and fields at reading
+	   time */
+	char *suffixed_key = calloc(1, strlen(key) +3);
+	strcat(suffixed_key, "_t");
+
+	add_elt(&oneList, suffixed_key, valuesJ);
+}
+
 void unpacking_from_api(void *s, json_object *valueJ, const char *key)
 {
 	size_t key_length = strlen(key);
@@ -88,6 +113,10 @@ void unpacking_from_api(void *s, json_object *valueJ, const char *key)
 		serie->name = json_object_get_string(valueJ);
 	else if(strcasecmp("timestamp", key) == 0)
 		serie->timestamp = get_ts();
+	else if(strcasecmp("metadata", key) == 0)
+		wrap_json_object_for_all(valueJ, unpack_metadata, (void*)serie->serie_columns.tags);
+	else if(strcasecmp("value", key) == 0 || strcasecmp("values", key) == 0)
+		wrap_json_object_for_all(valueJ, unpack_values, (void*)serie->serie_columns.fields);
 	/* Treat all key looking for tag and field object. Those ones could be find
 	   with the last 2 character. '_t' for tag and '_f' that are the keys that
 	   could be indefinite. Cf influxdb documentation:
