@@ -44,6 +44,9 @@ set(PROJECT_APP_TEMPLATES_DIR "conf.d/app-templates")
 #set(CMAKE_BUILD_TYPE "DEBUG")
 #set(USE_EFENCE 1)
 
+# Helpers Submodule parameters
+set(AFB_HELPERS_QTWSCLIENT OFF CACHE BOOL "Adds QT5 WebSocket helpers from submodule")
+
 # Kernel selection if needed. You can choose between a
 # mandatory version to impose a minimal version.
 # Or check Kernel minimal version and just print a Warning
@@ -66,7 +69,6 @@ set (gcc_minimal_version 4.9)
 # -----------------------------
 set (PKG_REQUIRED_LIST
 	json-c
-	libcurl
 	libsystemd>=222
 	afb-daemon
 	libmicrohttpd>=0.9.55
