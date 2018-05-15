@@ -41,11 +41,11 @@ size_t make_url(char *url, size_t l_url, const char *host, const char *port, con
 	port = port ? port : DEFAULT_DBPORT;
 
 	strncat(url, host, strlen(host));
-	strncat(url, ":", 1);
+	strcat(url, ":");
 	strncat(url, port, strlen(port));
-	strncat(url, "/", 1);
+	strcat(url, "/");
 	strncat(url, endpoint, strlen(endpoint));
-	strncat(url, "?db="DEFAULT_DB, strlen("?db="DEFAULT_DB));
+	strcat(url, "?db="DEFAULT_DB);
 
 	return strlen(url);
 }
