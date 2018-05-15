@@ -48,9 +48,9 @@ void afv_write(struct afb_req req)
 				*metric = NULL;
 
 	if(wrap_json_unpack(req_args, "{s?s,s?o,so!}",
-								"host", &host,
-								"port", &portJ,
-								"metric", &metric) || ! metric)
+			"host", &host,
+			"port", &portJ,
+			"metric", &metric) || ! metric)
 		afb_req_fail(req, "Failed", "Error processing arguments. Miss metric\
 JSON object or malformed");
 	else {
@@ -82,10 +82,10 @@ int init()
 		case INFLUX:
 			tsdb_write = influxdb_write;
 			write_curl_cb = influxdb_write_curl_cb;
-			if(influxdb_reader(&r_args) != 0) {
+			/*if(influxdb_reader(&r_args) != 0) {
 				AFB_ERROR("Problem initiating reader timer. Abort");
 				return ERROR;
-			}
+			}*/
 			break;
 		default:
 			AFB_ERROR("No Time Series Database found. Abort");

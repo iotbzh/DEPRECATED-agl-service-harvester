@@ -91,7 +91,6 @@ static void unpack_metric_from_db(void *ml, json_object *metricJ)
 
 	wrap_json_array_for_all(columnsJ, fill_key, m_list);
 	wrap_json_array_for_all(valuesJ, fill_n_send_values, m_list);
-
 }
 
 static json_object *unpack_series(json_object *seriesJ)
@@ -176,7 +175,7 @@ static CURL *make_curl_query_get(const char *url)
 	args[0] = "epoch";
 	args[1] = "ns";
 	args[2] = "q";
-	strncat(query, "SELECT * FROM /^.*$/", strlen("SELECT * FROM /^.*$/"));
+	strcat(query, "SELECT * FROM /^.*$/");
 	args[4] = NULL;
 	length_now = asprintf(&now, "%lu", get_ts());
 
@@ -192,7 +191,7 @@ static CURL *make_curl_query_get(const char *url)
 			AFB_ERROR("Error writing last_db_read file: %s\n", strerror( errno ));
 	}
 	else {
-		strncat(query, " WHERE time >= ", strlen(" WHERE time >= "));
+		strcat(query, " WHERE time >= ");
 		strncat(query, last_ts, strlen(last_ts));
 		close(fd_last_read);
 		fd_last_read = openat(rootdir_fd, "last_db_read", O_TRUNC | O_RDWR);
