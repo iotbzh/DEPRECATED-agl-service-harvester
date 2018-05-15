@@ -19,6 +19,7 @@
 #define _INFLUXDB_H_
 
 #define _GNU_SOURCE
+#include "ctl-plugin.h"
 #include "wrap-json.h"
 #include "tsdb.h"
 #include "../utils/list.h"
@@ -34,7 +35,7 @@ struct series_t {
 	uint64_t timestamp;
 };
 
-int create_database();
+int create_database(AFB_ReqT request);
 
 int unpack_metric_from_api(json_object *m, struct series_t *serie);
 

@@ -18,9 +18,6 @@
 #ifndef _TSDB_H
 #define _TSDB_H
 
-#define AFB_BINDING_VERSION 2
-#include <afb/afb-binding.h>
-
 #include <json-c/json.h>
 #include "curl-wrap.h"
 
@@ -32,6 +29,7 @@
 #define URL_MAXIMUM_LENGTH 2047
 
 enum db_available {
+	NODB = 0,
 	INFLUX = 1,
 	GRAPHITE = 2,
 	OPENTSDB = 4
@@ -42,13 +40,6 @@ struct reader_args {
 	const char *port;
 	u_int32_t delay;
 };
-
-CURL *influxdb_write(const char* host, const char *port, json_object *metric);
-void influxdb_write_curl_cb(void *closure, int status, CURL *curl, const char *result, size_t size);
-
-int influxdb_reader(void *args);
-
-int db_ping();
 
 u_int64_t get_ts();
 

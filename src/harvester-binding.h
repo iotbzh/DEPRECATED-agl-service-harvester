@@ -1,12 +1,13 @@
 /*
- * Copyright (C) 2018 "IoT.bzh"
- * Author "Romain Forlot" <romain.forlot@iot.bzh>
+ * Copyright (C) 2016 "IoT.bzh"
+ * Author Fulup Ar Foll <fulup@iot.bzh>
+ * Author Romain Forlot <romain@iot.bzh>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *	 http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -14,20 +15,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef _HARVESTER_H_
-#define _HARVESTER_H_
 
-#define AFB_BINDING_VERSION 2
-#include <afb/afb-binding.h>
 
-enum metric_type {b = 0, i, d, str} type;
-union metric_value {
-	int b_value;
-	int i_value;
-	double d_value;
-	char *str_value;
-};
+#ifndef _CTL_BINDING_INCLUDE_
+#define _CTL_BINDING_INCLUDE_
 
-int init();
+#include <stdio.h>
+#include <ctl-config.h>
+#include <filescan-utils.h>
+#include <wrap-json.h>
 
+#ifndef ERROR
+  #define ERROR -1
 #endif
+
+#endif /* _CTL_BINDING_INCLUDE_ */
