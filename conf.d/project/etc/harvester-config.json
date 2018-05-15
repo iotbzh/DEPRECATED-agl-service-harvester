@@ -1,0 +1,36 @@
+{
+    "$schema": "http://iot.bzh/download/public/schema/json/ctl-schema.json",
+    "metadata": {
+        "uid": "Harvester",
+        "version": "1.0",
+        "api": "harvester",
+        "info": "Data collection binding"
+    },
+    "plugins": [
+        {
+            "uid": "influxdb",
+            "info": "Plugins that handle influxdb read and write",
+            "spath": "lib/plugins",
+            "libs": "influxdb.ctlso"
+        }
+    ],
+
+    "onload": [
+        {
+            "uid": "init_db",
+            "info": "Ensure that InfluxDB is up",
+            "action": "plugin://influxdb#influxdb_ping"
+        }
+    ],
+
+    "controls": [
+        {
+            "uid": "write",
+            "action": "plugin://influxdb#write_to_influxdb"
+        },
+        {
+            "uid": "read",
+            "action": "plugin://influxdb#read_from_influxdb"
+        }
+    ]
+}

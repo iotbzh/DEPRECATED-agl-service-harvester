@@ -77,7 +77,7 @@ set (PKG_REQUIRED_LIST
 # Prefix path where will be installed the files
 # Default: /usr/local (need root permission to write in)
 # ------------------------------------------------------
-#set(CMAKE_INSTALL_PREFIX $ENV{HOME}/opt)
+set(CMAKE_INSTALL_PREFIX $ENV{HOME}/opt)
 
 # Customize link option
 # -----------------------------
@@ -124,6 +124,12 @@ set (PKG_REQUIRED_LIST
 # -g
 # -O2
 # CACHE STRING "Compilation flags for RELEASE build type.")
+
+set(CONTROL_SUPPORT_LUA 1)
+add_definitions(-DCONTROL_PLUGIN_PATH="${CMAKE_BINARY_DIR}/package/lib/plugins:${CMAKE_BINARY_DIR}/package/var:${CMAKE_INSTALL_PREFIX}/${PROJECT_NAME}/lib/plugins")
+add_definitions(-DCONTROL_CONFIG_PATH="${CMAKE_BINARY_DIR}/package/etc:${CMAKE_INSTALL_PREFIX}/${PROJECT_NAME}/etc")
+add_definitions(-DCTL_PLUGIN_MAGIC=1286576532)
+add_definitions(-DUSE_API_DYN=1)
 
 # (BUG!!!) as PKG_CONFIG_PATH does not work [should be an env variable]
 # ---------------------------------------------------------------------

@@ -18,31 +18,6 @@
 #include <time.h>
 #include "tsdb.h"
 
-int influxdb_ping()
-{
-	int ret = 0;
-	char *result;
-	size_t result_size;
-	CURL *request = curl_wrap_prepare_get("localhost:"DEFAULT_DBPORT"/ping",NULL, NULL);
-	curl_wrap_perform(request, &result, &result_size);
-
-	if(curl_wrap_response_code_get(request) != 204) {
-		AFB_ERROR("TimeSeries DB not reachable");
-		ret = ERROR;
-	}
-
-	curl_easy_cleanup(request);
-	return ret;
-}
-
-int db_ping()
-{
-	int ret = 0;
-	if(influxdb_ping() == 0) ret = INFLUX;
-
-	return ret;
-}
-
 uint64_t get_ts()
 {
 	struct timespec ts;

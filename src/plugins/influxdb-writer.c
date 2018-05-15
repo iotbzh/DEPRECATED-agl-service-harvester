@@ -21,6 +21,35 @@
 
 #include "influxdb.h"
 
+void influxdb_write_curl_cb(void *closure, int status, CURL *curl, const char *result, size_t size)
+{
+	AFB_ReqT request = (AFB_ReqT)closure;
+	long rep_code = curl_wrap_response_code_get(curl);
+	switch(rep_code) {
+		case 204:
+			AFB_ReqDebug(request, "Request correctly written");
+			AFB_ReqSucess(request, NULL, "Request has been successfully writen");
+			break;
+		case 400:
+			AFB_ReqFail(request, "Bad request", result);
+			break;
+		case 401:
+			AFB_ReqFail(request, "Unauthorized access", result);
+			break;
+		case 404:
+			AFB_ReqFail(request, "Not found", result);
+			AFB_ReqNotice(request, "Attempt to create the DB '"DEFAULT_DB"'");
+			create_database(request);
+			break;
+		case 500:
+			AFB_ReqFailF(request, "Timeout", "Overloaded server: %s", result);
+			break;
+		default:
+			AFB_ReqFail(request, "Failure", "Unexpected behavior.");
+			break;
+	}
+}
+
 static size_t format_write_args(char *query, struct series_t *serie)
 {
 	char *ts;
@@ -59,36 +88,7 @@ static size_t format_write_args(char *query, struct series_t *serie)
 	return strlen(query);
 }
 
-void influxdb_write_curl_cb(void *closure, int status, CURL *curl, const char *result, size_t size)
-{
-	struct afb_req *req = (struct afb_req*)closure;
-	long rep_code = curl_wrap_response_code_get(curl);
-	switch(rep_code) {
-		case 204:
-			AFB_DEBUG("Request correctly written");
-			afb_req_success(*req, NULL, "Request has been successfully writen");
-			break;
-		case 400:
-			afb_req_fail(*req, "Bad request", result);
-			break;
-		case 401:
-			afb_req_fail(*req, "Unauthorized access", result);
-			break;
-		case 404:
-			afb_req_fail(*req, "Not found", result);
-			AFB_NOTICE("Attempt to create the DB '"DEFAULT_DB"'");
-			create_database();
-			break;
-		case 500:
-			afb_req_fail_f(*req, "Timeout", "Overloaded server: %s", result);
-			break;
-		default:
-			afb_req_fail(*req, "Failure", "Unexpected behavior.");
-			break;
-	}
-}
-
-CURL *make_curl_write_post(const char *url, json_object *metricsJ)
+CURL *make_curl_write_post(AFB_ApiT apiHandle, const char *url, json_object *metricsJ)
 {
 	CURL *curl = NULL;
 	size_t lpd = 0, len_write = 0, i = 0;
@@ -114,7 +114,7 @@ CURL *make_curl_write_post(const char *url, json_object *metricsJ)
 		memset(serie, 0, sizeof(struct series_t));
 
 		if(unpack_metric_from_api(json_object_array_get_idx(metricsArrayJ, i), serie)) {
-			AFB_ERROR("ERROR unpacking metric. %s", json_object_to_json_string(metricsArrayJ));
+			AFB_ApiError(apiHandle, "ERROR unpacking metric. %s", json_object_to_json_string(metricsArrayJ));
 			break;
 		}
 		else {
@@ -144,9 +144,36 @@ CURL *make_curl_write_post(const char *url, json_object *metricsJ)
 	return curl;
 }
 
-CURL *influxdb_write(const char* host, const char *port, json_object *metricJ)
+CURL *influxdb_write(AFB_ApiT apiHandle, const char* host, const char *port, json_object *metricJ)
 {
 	char url[URL_MAXIMUM_LENGTH]; /* Safe limit for most popular web browser */
 	make_url(url, sizeof(url), host, port, "write");
-	return make_curl_write_post(url, metricJ);
+	return make_curl_write_post(apiHandle, url, metricJ);
+}
+
+CTLP_CAPI(write_to_influxdb, source, argsJ, eventJ)
+{
+	AFB_ReqT request = source->request;
+	const char *port = NULL;
+	const char *host = NULL;
+	CURL *curl_request;
+
+	json_object *req_args = AFB_ReqJson(request),
+				*portJ = NULL,
+				*metric = NULL;
+
+	if(wrap_json_unpack(req_args, "{s?s,s?o,so!}",
+			"host", &host,
+			"port", &portJ,
+			"metric", &metric) || ! metric)
+		AFB_ReqFail(request, "Failed", "Error processing arguments. Miss metric\
+JSON object or malformed");
+	else
+		port = json_object_is_type(portJ, json_type_null) ?
+			NULL : json_object_to_json_string(portJ);
+
+	curl_request = influxdb_write(source->api, host, port, metric);
+	curl_wrap_do(curl_request, influxdb_write_curl_cb, request);
+
+	return 0;
 }

@@ -26,6 +26,50 @@
 #include "wrap-json.h"
 #include "../utils/list.h"
 
+CTLP_CAPI_REGISTER("influxdb");
+
+CTLP_ONLOAD(plugin, ret)
+{
+	int err = 0;
+	char *result;
+	size_t result_size;
+	CURL *request = curl_wrap_prepare_get("localhost:"DEFAULT_DBPORT"/ping",NULL, NULL);
+
+	struct reader_args r_args = {NULL, NULL, 1000000};
+	plugin->context = (void*)&r_args;
+
+	curl_wrap_perform(request, &result, &result_size);
+
+	if(curl_wrap_response_code_get(request) != 204) {
+		AFB_ApiError(plugin->api, "InfluxDB not reachable, please start it");
+		err = ERROR;
+	}
+
+	curl_easy_cleanup(request);
+	return err;
+}
+
+CTLP_CAPI(influxdb_ping, source, argsJ, eventJ)
+{
+	int ret = 0;
+	char *result;
+	size_t result_size;
+
+	CURL *curl_req = curl_wrap_prepare_get("localhost:"DEFAULT_DBPORT"/ping",NULL, NULL);
+
+	curl_wrap_perform(curl_req, &result, &result_size);
+
+	if(curl_wrap_response_code_get(curl_req) != 204) {
+		AFB_ApiError(source->api, "InfluxDB is offline.");
+		ret = ERROR;
+	}
+
+	curl_easy_cleanup(curl_req);
+
+	AFB_ApiNotice(source->api, "InfluxDB is up and running.");
+	return ret;
+}
+
 void concatenate(char* dest, const char* source, const char *sep)
 {
 	strncat(dest, sep, strlen(sep));
@@ -51,7 +95,7 @@ size_t make_url(char *url, size_t l_url, const char *host, const char *port, con
 }
 
 
-int create_database()
+int create_database(AFB_ReqT request)
 {
 	int ret = 0;
 	char *result;
@@ -62,18 +106,18 @@ int create_database()
 	post_data[0] = "q=CREATE DATABASE \""DEFAULT_DB"\"";
 	post_data[1] = NULL;
 
-	CURL *request = curl_wrap_prepare_post_unescaped("localhost:"DEFAULT_DBPORT"/query",NULL, " ", post_data);
-	curl_wrap_perform(request, &result, &result_size);
+	CURL *curl_req = curl_wrap_prepare_post_unescaped("localhost:"DEFAULT_DBPORT"/query",NULL, " ", post_data);
+	curl_wrap_perform(curl_req, &result, &result_size);
 
 	if(curl_wrap_response_code_get(request) != 200) {
-		AFB_ERROR("Can't create database.");
+		AFB_ReqError(request, "Can't create database.");
 		ret = ERROR;
 	}
 
-	curl_easy_cleanup(request);
+	curl_easy_cleanup(curl_req);
 
 	if(ret == 0)
-		AFB_NOTICE("Database '"DEFAULT_DB"' created");
+		AFB_ReqNotice(request, "Database '"DEFAULT_DB"' created");
 
 	return ret;
 }
