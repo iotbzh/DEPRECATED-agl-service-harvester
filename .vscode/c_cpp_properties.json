@@ -13,7 +13,8 @@
                 "/opt/include",
                 "/opt/AGL/include",
                 "${workspaceFolder}/afb-helpers",
-                "${workspaceFolder}/src"
+                "${workspaceFolder}/src",
+                "${workspaceFolder}/app-controller-submodule/ctl-lib"
             ],
             "defines": [],
             "intelliSenseMode": "clang-x64",
