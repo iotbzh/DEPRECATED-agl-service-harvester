@@ -63,10 +63,12 @@ CTLP_CAPI(influxdb_ping, source, argsJ, eventJ)
 		AFB_ApiError(source->api, "InfluxDB is offline.");
 		ret = ERROR;
 	}
+	else {
+		AFB_ApiNotice(source->api, "InfluxDB is up and running.");
+	}
 
 	curl_easy_cleanup(curl_req);
 
-	AFB_ApiNotice(source->api, "InfluxDB is up and running.");
 	return ret;
 }
 
