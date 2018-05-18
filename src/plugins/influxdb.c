@@ -159,7 +159,8 @@ void unpacking_from_api(void *s, json_object *valueJ, const char *key)
 	if(strcasecmp("name", key) == 0)
 		serie->name = json_object_get_string(valueJ);
 	else if(strcasecmp("timestamp", key) == 0)
-		serie->timestamp = get_ts();
+		serie->timestamp = (json_object_is_type(valueJ, json_type_int)) ?
+			json_object_get_int64(valueJ) : 0;
 	else if(strcasecmp("metadata", key) == 0)
 		wrap_json_object_for_all(valueJ, unpack_metadata, (void*)&serie->serie_columns.tags);
 	else if(strcasecmp("value", key) == 0 || strcasecmp("values", key) == 0)
@@ -178,8 +179,9 @@ int unpack_metric_from_api(json_object *m, struct series_t *serie)
 {
 	wrap_json_object_for_all(m, unpacking_from_api, serie);
 
-	if(!serie->timestamp)
+	if(! serie->timestamp) {
 		serie->timestamp = get_ts();
+	}
 
 	return 0;
 }
