@@ -108,7 +108,7 @@ CURL *make_curl_write_post(AFB_ApiT apiHandle, const char *url, json_object *met
 	}
 
 	serie = malloc(sizeof(struct series_t));
-	post_data = calloc(lpd, sizeof(void*));
+	post_data = calloc(lpd + 1, sizeof(void*));
 
 	for(i = 0; i < lpd; i++) {
 		memset(serie, 0, sizeof(struct series_t));
