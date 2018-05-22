@@ -17,5 +17,12 @@
 		"influxdb.h": "c"
 	},
 	"C_Cpp.intelliSenseEngineFallback": "Disabled",
-	"C_Cpp.errorSquiggles": "Disabled"
+    "C_Cpp.errorSquiggles": "Disabled",
+    "cSpell.words": [
+        "CTLP",
+        "DBHOST",
+        "DBPORT",
+        "influxdb",
+        "serie"
+    ]
 }
