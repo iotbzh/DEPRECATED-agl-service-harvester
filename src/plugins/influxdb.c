@@ -19,7 +19,6 @@
 #include <fcntl.h>
 #include <stdio.h>
 #include <unistd.h>
-#include <string.h>
 
 #include "influxdb.h"
 #include "tsdb.h"
@@ -70,12 +69,6 @@ CTLP_CAPI(influxdb_ping, source, argsJ, eventJ)
 	curl_easy_cleanup(curl_req);
 
 	return ret;
-}
-
-void concatenate(char* dest, const char* source, const char *sep)
-{
-	strncat(dest, sep, strlen(sep));
-	strncat(dest, source, strlen(source));
 }
 
 size_t make_url(char *url, size_t l_url, const char *host, const char *port, const char *endpoint)
