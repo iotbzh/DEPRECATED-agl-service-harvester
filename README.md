@@ -36,7 +36,7 @@ sudo zypper in ./chronograf-1.4.4.2.x86_64.rpm
 Typical example to write in a TimeSeries DB from source project directory:
 
 ```bash
-$ cd build/ && /opt/AGL/bin/afb-daemon --workdir=./package --name=afbd-harvester --ldpaths=lib --roothttp=. --tracereq=common --token=1 -vvv
+$ cd build/ && /opt/AGL/bin/afb-daemon --workdir=./package --name=afb-harvester --ldpaths=lib --roothttp=. --tracereq=common --token=1 -vvv
 [...]
 $ afb-client-demo ws://localhost:1234/api?token=1
 harvester auth
