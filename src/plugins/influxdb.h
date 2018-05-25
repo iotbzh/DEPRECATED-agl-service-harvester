@@ -19,6 +19,8 @@
 #define _INFLUXDB_H_
 
 #define _GNU_SOURCE
+#include <string.h>
+
 #include "ctl-plugin.h"
 #include "wrap-json.h"
 #include "tsdb.h"
@@ -39,7 +41,11 @@ int create_database(AFB_ReqT request);
 
 int unpack_metric_from_api(json_object *m, struct series_t *serie);
 
-void concatenate(char* dest, const char* source, const char *sep);
+static inline void concatenate(char* dest, const char* source, const char *sep)
+{
+	strncat(dest, sep, strlen(sep));
+	strncat(dest, source, strlen(source));
+}
 
 size_t make_url(char *url, size_t l_url, const char *host, const char *port, const char *endpoint);
 
