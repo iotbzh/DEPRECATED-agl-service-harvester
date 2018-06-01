@@ -21,32 +21,83 @@
 #define _GNU_SOURCE
 #include <string.h>
 
-#include "ctl-plugin.h"
-#include "wrap-json.h"
-#include "tsdb.h"
 #include "../utils/list.h"
+#include "ctl-plugin.h"
+#include "tsdb.h"
+#include "wrap-json.h"
 
 struct serie_columns_t {
-	struct list *tags;
-	struct list *fields;
+    struct list* tags;
+    struct list* fields;
 };
 
 struct series_t {
-	const char *name;
-	struct serie_columns_t serie_columns;
-	uint64_t timestamp;
+    const char* name;
+    struct serie_columns_t serie_columns;
+    uint64_t timestamp;
 };
 
 int create_database(AFB_ReqT request);
 
-int unpack_metric_from_api(json_object *m, struct series_t *serie);
+int unpack_metric_from_api(json_object* m, struct series_t* serie);
 
-static inline void concatenate(char* dest, const char* source, const char *sep)
+static inline int should_escape(char c)
 {
-	strncat(dest, sep, strlen(sep));
-	strncat(dest, source, strlen(source));
+    switch (c) {
+    case ',':
+    case '=':
+    case ' ':
+    case '"':
+        return 1;
+        break;
+    }
+    return 0;
 }
 
-size_t make_url(char *url, size_t l_url, const char *host, const char *port, const char *endpoint);
+static inline char* escape_chr(const char* src)
+{
+    int j, i = 0;
+    size_t len, src_len;
+    char* res;
+
+    len = src_len = strlen(src);
+    while (i < src_len) {
+        if (should_escape(src[i++]))
+            len++;
+    }
+
+    if (len == src_len) {
+        res = strdup(src);
+    } else {
+        res = malloc(len + 1);
+        if (res) {
+            i = j = 0;
+            while (i < src_len) {
+                if (should_escape(src[i]))
+                    res[j++] = '\\';
+                res[j++] = src[i++];
+            }
+        }
+        res[j] = '\0';
+    }
+    return res;
+}
+
+static inline void concatenate(char* dest, const char* source, const char* sep)
+{
+    char* esc_source;
+
+    if (sep)
+        strncat(dest, sep, strlen(sep));
+
+    esc_source = escape_chr(source);
+
+    strncat(dest, esc_source, strlen(esc_source));
+
+    if (esc_source)
+        free(esc_source);
+}
+
+size_t make_url(char* url, size_t l_url, const char* host, const char* port, const char* endpoint);
 
 #endif
