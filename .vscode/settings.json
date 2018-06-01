@@ -21,7 +21,8 @@
         "type_traits": "c",
         "influxdb.h": "c",
         "tsdb.h": "c",
-        "ctl-plugin.h": "c"
+        "ctl-plugin.h": "c",
+        "escape.h": "c"
     },
 	"C_Cpp.intelliSenseEngineFallback": "Disabled",
     "C_Cpp.errorSquiggles": "Disabled",

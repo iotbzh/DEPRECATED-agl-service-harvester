@@ -56,7 +56,7 @@ static size_t format_write_args(char *query, struct series_t *serie)
 	struct list *tags = serie->serie_columns.tags;
 	struct list *fields = serie->serie_columns.fields;
 
-	strncat(query, serie->name, strlen(serie->name));
+    concatenate(query, serie->name, NULL);
 	if(tags) {
 		while(tags != NULL) {
 			concatenate(query, tags->key, ",");
@@ -131,6 +131,8 @@ CURL *make_curl_write_post(AFB_ApiT apiHandle, const char *url, json_object *met
 			}
 		}
 	}
+
+    AFB_ApiDebug(apiHandle, "influx curl: url=%s data=%s", url, (const char*) *post_data);
 
 	/* Check that we just do not broke the for loop before trying preparing CURL
 	   request object */
