@@ -22,7 +22,8 @@
         "influxdb.h": "c",
         "tsdb.h": "c",
         "ctl-plugin.h": "c",
-        "escape.h": "c"
+        "escape.h": "c",
+        "ostream": "c"
     },
 	"C_Cpp.intelliSenseEngineFallback": "Disabled",
     "C_Cpp.errorSquiggles": "Disabled",
