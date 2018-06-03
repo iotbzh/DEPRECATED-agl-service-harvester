@@ -17,96 +17,91 @@
 
 #include "list.h"
 #include "string.h"
+#include <stdio.h>
+#include <stdlib.h>
 
-void destroy_list(struct list *l)
+void destroy_list(struct list* l)
 {
-	struct list *save;
-	while(l != NULL) {
-		save = l->next;
-		free(l);
-		l = save;
-	}
+    struct list* save;
+    while (l != NULL) {
+        save = l->next;
+        free(l);
+        l = save;
+    }
 }
 
-void add_elt(struct list **l, const char *key, json_object *value)
+void add_elt(struct list** l, const char* key, json_object* value)
 {
-	struct list *new_elt = malloc(sizeof(struct list));
-	new_elt->key = key;
-	new_elt->value = value;
-	new_elt->next = NULL;
+    struct list* new_elt;
 
-	if(*l) {
-		while((*l)->next != NULL) {
-			*l = (*l)->next;
-		}
-		(*l)->next = new_elt;
-	}
-	else {
-		*l = new_elt;
-	}
+    // search tail
+    new_elt = *l;
+    while (new_elt != NULL) {
+        l = &new_elt->next;
+        new_elt = new_elt->next;
+    }
+
+    // alloc new elem
+    new_elt = malloc(sizeof(struct list));
+    if (!new_elt) {
+        fprintf(stderr, "OUT of memory");
+        exit(1);
+    }
+
+    *l = new_elt;
+    new_elt->key = key;
+    new_elt->value = value;
+    new_elt->next = NULL;
 }
 
-void add_key(struct list **l, const char *key)
+void add_key(struct list** l, const char* key)
 {
-	struct list *new_elt = malloc(sizeof(struct list));
-	new_elt->key = key;
-	new_elt->value = NULL;
-	new_elt->next = NULL;
-
-	if(*l) {
-		while((*l)->next != NULL) {
-			*l = (*l)->next;
-		}
-		(*l)->next = new_elt;
-	}
-	else {
-		*l = new_elt;
-	}
+    add_elt(l, key, NULL);
 }
 
-int set_value(struct list *l, json_object *val, int index)
+int set_value(struct list* l, json_object* val, int index)
 {
-	int i;
+    int i;
 
-	for (i = 0; i < index; i++) {
-		l = l->next;
-		if ( l == NULL )
-			return -1;
-	}
+    for (i = 0; i < index; i++) {
+        l = l->next;
+        if (l == NULL)
+            return -1;
+    }
 
-	l->value = val;
-	return 0;
+    l->value = val;
+    return 0;
 }
 
-struct list *get_elt(struct list *l, int index)
+struct list* get_elt(struct list* l, int index)
 {
-	int i;
+    int i;
 
-	for (i = 0; i < index; i++) {
-		l = l->next;
-		if ( l == NULL )
-			return NULL;
-	}
+    for (i = 0; i < index; i++) {
+        l = l->next;
+        if (l == NULL)
+            return NULL;
+    }
 
-	return l;
+    return l;
 }
 
-struct list *find_elt_from_key(struct list *l, const char *key)
+struct list* find_elt_from_key(struct list* l, const char* key)
 {
-	while(l != NULL) {
-		if(strcasecmp(l->key, key) == 0)
-			return l;
-		l = l->next;
-	}
-	return NULL;
+    while (l != NULL) {
+        if (strcasecmp(l->key, key) == 0)
+            return l;
+        l = l->next;
+    }
+    return NULL;
 }
 
-json_object *find_key_value(struct list *l, const char *key)
+json_object* find_key_value(struct list* l, const char* key)
 {
-	while(l != NULL) {
-		if(strcasecmp(l->key, key) == 0)
-			return l->value;
-		l = l->next;
-	}
-	return NULL;
+    while (l != NULL) {
+        if (strcasecmp(l->key, key) == 0)
+            return l->value;
+        l = l->next;
+    }
+    return NULL;
 }
