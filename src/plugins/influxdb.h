@@ -20,6 +20,7 @@
 
 #define _GNU_SOURCE
 #include <string.h>
+#include <stdbool.h>
 
 #include "../utils/list.h"
 #include "ctl-plugin.h"
@@ -41,20 +42,28 @@ int create_database(AFB_ReqT request);
 
 int unpack_metric_from_api(json_object* m, struct series_t* serie);
 
-static inline int should_escape(char c)
+static inline int should_escape(char c, bool quoteOnly)
 {
-    switch (c) {
-    case ',':
-    case '=':
-    case ' ':
-    case '"':
-        return 1;
-        break;
+    if (quoteOnly) {
+        return (c == '"');
+    } else {
+        switch (c) {
+        case ',':
+        case '=':
+        case ' ':
+        case '"':
+            return 1;
+            break;
+        }
     }
     return 0;
 }
 
-static inline char* escape_chr(const char* src)
+/*
+  Escape special characters according to influxDB doc
+  https://docs.influxdata.com/influxdb/v1.5/write_protocols/line_protocol_reference/#special-characters
+*/
+static inline char* escape_chr(const char* src, bool quoteOnly)
 {
     int j, i = 0;
     size_t len, src_len;
@@ -62,7 +71,7 @@ static inline char* escape_chr(const char* src)
 
     len = src_len = strlen(src);
     while (i < src_len) {
-        if (should_escape(src[i++]))
+        if (should_escape(src[i++], quoteOnly))
             len++;
     }
 
@@ -73,7 +82,11 @@ static inline char* escape_chr(const char* src)
         if (res) {
             i = j = 0;
             while (i < src_len) {
-                if (should_escape(src[i]))
+                if (src[i] == '\\') {
+                    i++;
+                    continue;
+                }
+                if (should_escape(src[i], quoteOnly))
                     res[j++] = '\\';
                 res[j++] = src[i++];
             }
@@ -90,12 +103,28 @@ static inline void concatenate(char* dest, const char* source, const char* sep)
     if (sep)
         strncat(dest, sep, strlen(sep));
 
-    esc_source = escape_chr(source);
+    esc_source = escape_chr(source, FALSE);
 
     strncat(dest, esc_source, strlen(esc_source));
 
     if (esc_source)
         free(esc_source);
+}
+
+static inline void concatenate_str(char* dest, const char* source, const char* sep)
+{
+        char* esc_source;
+
+    if (sep)
+        strncat(dest, sep, strlen(sep));
+    strncat(dest, "\"", 1);
+
+    esc_source = escape_chr(source, TRUE);
+    strncat(dest, esc_source, strlen(esc_source));
+    if (esc_source)
+        free(esc_source);
+
+    strncat(dest, "\"", 1);
 }
 
 size_t make_url(char* url, size_t l_url, const char* host, const char* port, const char* endpoint);

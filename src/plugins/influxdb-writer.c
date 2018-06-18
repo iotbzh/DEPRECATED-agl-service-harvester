@@ -76,9 +76,9 @@ static size_t format_write_args(char* query, struct series_t* serie)
             else
                 concatenate(query, it->key, ",");
             if (json_object_is_type(it->value, json_type_string))
-                concatenate(query, json_object_get_string(it->value), "=");
+                concatenate_str(query, json_object_get_string(it->value), "=");
             else
-                concatenate(query, json_object_to_json_string(it->value), "=");
+                concatenate_str(query, json_object_to_json_string(it->value), "=");
             i++;
         }
     }
@@ -165,8 +165,7 @@ CTLP_CAPI(write_to_influxdb, source, argsJ, eventJ)
     if (wrap_json_unpack(req_args, "{s?s,s?o,so!}",
             "host", &host,
             "port", &portJ,
-            "metric", &metric)
-        || !metric)
+            "metric", &metric) || !metric)
         AFB_ReqFail(request, "Failed", "Error processing arguments. Miss metric\
 JSON object or malformed");
     else
