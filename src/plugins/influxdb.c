@@ -123,7 +123,7 @@ void unpack_values(void* l, json_object* valuesJ, const char* key)
 	   time */
     char* suffixed_key = calloc(1, strlen(key) + 3);
     strcpy(suffixed_key, key);
-    strcat(suffixed_key, "_f");
+    // strcat(suffixed_key, "_f");
 
     add_elt(oneList, suffixed_key, valuesJ);
 }
@@ -136,7 +136,7 @@ void unpack_metadata(void* l, json_object* valuesJ, const char* key)
 	   time */
     char* suffixed_key = calloc(1, strlen(key) + 3);
     strcpy(suffixed_key, key);
-    strcat(suffixed_key, "_t");
+    // strcat(suffixed_key, "_t");
 
     add_elt(oneList, suffixed_key, valuesJ);
 }
