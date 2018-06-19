@@ -23,7 +23,8 @@
         "tsdb.h": "c",
         "ctl-plugin.h": "c",
         "escape.h": "c",
-        "ostream": "c"
+        "ostream": "c",
+        "harvester-binding.h": "c"
     },
 	"C_Cpp.intelliSenseEngineFallback": "Disabled",
     "C_Cpp.errorSquiggles": "Disabled",

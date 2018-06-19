@@ -28,7 +28,7 @@ void influxdb_write_curl_cb(void* closure, int status, CURL* curl, const char* r
     switch (rep_code) {
     case 204:
         AFB_ReqDebug(request, "Request correctly written");
-        AFB_ReqSucess(request, NULL, "Request has been successfully written");
+        AFB_ReqSuccess(request, NULL, "Request has been successfully written");
         break;
     case 400:
         AFB_ReqFail(request, "Bad request", result);
