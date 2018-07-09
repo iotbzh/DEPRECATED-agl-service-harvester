@@ -46,7 +46,7 @@ static void ctrlapi_ping(AFB_ReqT request) {
 	return;
 }
 
-void ctrlapi_auth(AFB_ReqT request)
+static void ctrlapi_auth(AFB_ReqT request)
 {
 	AFB_ReqSetLOA(request, 1);
 	AFB_ReqSuccess(request, NULL, NULL);
