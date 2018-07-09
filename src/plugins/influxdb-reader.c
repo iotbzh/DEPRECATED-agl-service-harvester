@@ -235,6 +235,9 @@ static int influxdb_read(sd_event_source *s, uint64_t usec, void *userdata)
 	return 0;
 }
 
+/*
+ * TODO RFOR: reader functions are not used for the moment
+ */
 CTLP_CAPI(read_from_influxdb, source, argsJ, eventJ)
 {
 	int err = 0;

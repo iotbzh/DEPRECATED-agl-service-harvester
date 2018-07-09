@@ -27,10 +27,6 @@
         {
             "uid": "write",
             "action": "plugin://influxdb#write_to_influxdb"
-        },
-        {
-            "uid": "read",
-            "action": "plugin://influxdb#read_from_influxdb"
         }
     ]
 }
