@@ -65,7 +65,7 @@ static inline int should_escape(char c, bool quoteOnly)
 */
 static inline char* escape_chr(const char* src, bool quoteOnly)
 {
-    int j, i = 0;
+    int j = 0, i = 0;
     size_t len, src_len;
     char* res;
 
