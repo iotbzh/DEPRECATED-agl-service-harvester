@@ -126,15 +126,15 @@ set(INSTALL_PREFIX $ENV{HOME}/opt)
 # CACHE STRING "Compilation flags for RELEASE build type.")
 
 set(CONTROL_SUPPORT_LUA 1)
-add_definitions(-DCONTROL_PLUGIN_PATH="${CMAKE_BINARY_DIR}/package/lib/plugins:${CMAKE_BINARY_DIR}/package/var:${CMAKE_INSTALL_PREFIX}/${PROJECT_NAME}/lib/plugins")
-add_definitions(-DCONTROL_CONFIG_PATH="${CMAKE_BINARY_DIR}/package/etc:${CMAKE_INSTALL_PREFIX}/${PROJECT_NAME}/etc")
+add_definitions(-DCONTROL_PLUGIN_PATH="${CMAKE_BINARY_DIR}/package/lib/plugins:${CMAKE_BINARY_DIR}/package/var:${INSTALL_PREFIX}/${PROJECT_NAME}/lib/plugins")
+add_definitions(-DCONTROL_CONFIG_PATH="${CMAKE_BINARY_DIR}/package/etc:${INSTALL_PREFIX}/${PROJECT_NAME}/etc")
 add_definitions(-DCTL_PLUGIN_MAGIC=1286576532)
 add_definitions(-DUSE_API_DYN=1 -DAFB_BINDING_VERSION=3 -DAFB_BINDING_WANT_DYNAPI)
 
 # (BUG!!!) as PKG_CONFIG_PATH does not work [should be an env variable]
 # ---------------------------------------------------------------------
-set(CMAKE_PREFIX_PATH ${CMAKE_INSTALL_PREFIX}/lib64/pkgconfig ${CMAKE_INSTALL_PREFIX}/lib/pkgconfig)
-set(LD_LIBRARY_PATH ${CMAKE_INSTALL_PREFIX}/lib64 ${CMAKE_INSTALL_PREFIX}/lib)
+set(CMAKE_PREFIX_PATH ${INSTALL_PREFIX}/lib64/pkgconfig ${INSTALL_PREFIX}/lib/pkgconfig)
+set(LD_LIBRARY_PATH ${INSTALL_PREFIX}/lib64 ${INSTALL_PREFIX}/lib)
 
 # Optional location for config.xml.in
 # -----------------------------------
