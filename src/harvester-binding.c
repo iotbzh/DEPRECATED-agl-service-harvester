@@ -115,7 +115,7 @@ static int CtrlLoadOneApi(void *cbdata, AFB_ApiT apiHandle) {
 	return err;
 }
 
-int afbBindingVdyn(afb_dynapi *apiHandle) {
+int afbBindingEntry(afb_dynapi *apiHandle) {
 
 	AFB_default = apiHandle;
 	AFB_ApiNotice(apiHandle, "Controller in afbBindingVdyn");
